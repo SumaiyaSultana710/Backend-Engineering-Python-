@@ -26,7 +26,7 @@ conn =  psycopg2.connect(
 
 cur = conn.cursor()
 
-todo_list = []
+# todo_list = []
 
 
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -46,6 +46,7 @@ class Todo(db.Model):
     def __init__(self, title):
         self.title = title
         self.complete = False 
+
 # class Todo:
 #     def __init__(self, id, title):
 #         self.id = id
@@ -57,6 +58,37 @@ def root():
     return "Hello World"
     #return redirect('/')
     #return redirect(url_for('root')) 
+
+@app.route('/todolist')
+def todolist():
+    todo_list = Todo.query.all( )
+    return render_template('todo.html', todo_list = todo_list)
+
+@app.route('/addtodo', methods = ['POST'])
+def add_todo():
+    
+    title = request.form.get('title')
+    new_todo = Todo(title = title)
+    db.session.add(new_todo)
+    db.session.commit()
+    
+    return redirect(url_for('todolist')) 
+
+@app.route('/updatetodo/<complete>/<int:todo_id>')
+def update_todo(complete,todo_id):
+    todo = Todo.query.filter_by(id = todo_id).first()
+    todo.complete = not todo.complete
+    db.session.commit()
+    return redirect(url_for('todolist')) 
+
+
+@app.route('/deletetodo/<int:todo_id>')
+def delete_todo(todo_id):
+    todo = Todo.query.filter_by(id = todo_id).first()
+    db.session.delete(todo)
+    db.session.commit()
+    return redirect(url_for('todolist')) 
+
 
 @app.route('/index')
 def index():
@@ -80,40 +112,40 @@ def dict():
     # return dict
     return make_response(dict), 202
 
-@app.route('/todolist')
-def todolist():
-    return render_template('todo.html', todo_list = todo_list)
+# @app.route('/todolist')
+# def todolist():
+#     return render_template('todo.html', todo_list = todo_list)
 
-
-@app.route('/addtodo', methods = ['POST'])
-def add_todo():
-    global count
-    title = request.form['title']
-    todo = Todo(count, title)
-    count += 1
+# @app.route('/addtodo', methods = ['POST'])
+# def add_todo():
+#     global count
+#     title = request.form['title']
+#     todo = Todo(count, title)
+#     count += 1
     
-    todo_list.append(todo)
+#     todo_list.append(todo)
 
-    return redirect(url_for('todolist')) 
+#     return redirect(url_for('todolist')) 
 
-@app.route('/updatetodo/<complete>/<int:id>')
-def update_todo(complete,id):
-    for todo in todo_list:
-        if todo.id == id:
-            if complete == "complete":
-                todo.complete = True
-                break
-            elif complete == "incomplete":
-                todo.complete = False
-                break
-    return redirect(url_for('todolist')) 
+# @app.route('/updatetodo/<complete>/<int:id>')
+# def update_todo(complete,id):
+#     for todo in todo_list:
+#         if todo.id == id:
+#             if complete == "complete":
+#                 todo.complete = True
+#                 break
+#             elif complete == "incomplete":
+#                 todo.complete = False
+#                 break
+#     return redirect(url_for('todolist')) 
 
-@app.route('/deletetodo/<int:id>')
-def delete_todo(id):
-    for todo in todo_list:
-        if todo.id == id:
-            todo_list.remove(todo)
-    return redirect(url_for('todolist')) 
+# @app.route('/deletetodo/<int:id>')
+# def delete_todo(id):
+#     for todo in todo_list:
+#         if todo.id == id:
+#             todo_list.remove(todo)
+#     return redirect(url_for('todolist')) 
+
 
 
 #### use of postgres cursor without ORM, direct query 
