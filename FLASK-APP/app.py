@@ -31,7 +31,7 @@ cur = conn.cursor()
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-app.config['SQLALCHEMY_DATABASE_URI'] = os .environ.get('DATABASE_URL') or 'sqlite:///' + os.path.join(basedir , 'app.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = os .environ.get('DATABASE_URL') or 'postgresql://postgres:sumaiya12@localhost:5432/flask_project'
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
