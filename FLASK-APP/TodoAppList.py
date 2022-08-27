@@ -1,56 +1,16 @@
 
-from ast import Global
-import os
 from flask import Flask, render_template, redirect, url_for, request, make_response
-import psycopg2
-# import mysql.connector
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
 
 app = Flask(__name__)
-#count = 1
-
-
-conn =  psycopg2.connect(
-    host = 'localhost',
-    database = "flask_project",
-    user = "postgres",
-    password = "sumaiya12")
-
-# using mysql
-# conn =  mysql.connector.connect(
-#     host = 'localhost',
-#     database = "flask_project",
-#     user = "root",
-#     password = "")
-
-cur = conn.cursor()
+count = 1
 
 todo_list = []
 
-
-basedir = os.path.abspath(os.path.dirname(__file__))
-
-app.config['SQLALCHEMY_DATABASE_URI'] = os .environ.get('DATABASE_URL') or 'sqlite:///' + os.path.join(basedir , 'app.db')
-
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-db = SQLAlchemy(app)
-migrate = Migrate(app , db)
-
-class Todo(db.Model):
-    id = db.Column(db.Integer , primary_key = True)
-    title = db.Column(db.String(100))
-    complete = db.Column(db.Boolean)
-
-    def __init__(self, title):
+class Todo:
+    def __init__(self, id, title):
+        self.id = id
         self.title = title
-        self.complete = False 
-# class Todo:
-#     def __init__(self, id, title):
-#         self.id = id
-#         self.title = title
-#         self.complete = False
+        self.complete = False
 
 @app.route('/')
 def root():
@@ -114,20 +74,6 @@ def delete_todo(id):
         if todo.id == id:
             todo_list.remove(todo)
     return redirect(url_for('todolist')) 
-
-
-#### use of postgres cursor without ORM, direct query 
-
-@app.route('/get-db')
-def get_db():
-    cur.execute('SELECT version()')
-    #display postgres db version
-    db_version = cur.fetchone()
-    print(db_version)
-
-    #close the communication with postgres
-    cur.close()
-    return 'True'
 
 
 if __name__ == "__main__":
