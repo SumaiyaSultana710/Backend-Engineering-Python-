@@ -1,7 +1,7 @@
 
 from ast import Global
 import os
-from flask import Flask, render_template, redirect, url_for, request, make_response
+from flask import Flask, render_template, redirect, url_for, request, make_response, jsonify
 import psycopg2
 # import mysql.connector
 from flask_sqlalchemy import SQLAlchemy
@@ -62,7 +62,16 @@ def root():
 @app.route('/todolist')
 def todolist():
     todo_list = Todo.query.all( )
+    data = []
+
+    for todo in todo_list:
+        data.append({
+            'id' : todo.id,
+            'title' : todo.title,
+            'complete' : todo.complete
+        })
     return render_template('todo.html', todo_list = todo_list)
+    # return jsonify(data)
 
 @app.route('/addtodo', methods = ['POST'])
 def add_todo():
@@ -70,6 +79,17 @@ def add_todo():
     title = request.form.get('title')
     new_todo = Todo(title = title)
     db.session.add(new_todo)
+    db.session.commit()
+    
+    return redirect(url_for('todolist')) 
+
+@app.route('/add-bulk-data')
+def add_bulk_data():
+    
+    for i in range(1,1000):
+
+        new_todo = Todo(f'Todo {i}')
+        db.session.add(new_todo)
     db.session.commit()
     
     return redirect(url_for('todolist')) 
